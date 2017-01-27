@@ -72,7 +72,7 @@ int main()
 	
 	semaphores = malloc( thread_count * sizeof(sem_t) );
 	
-	for( i=0; i<thread_count; i++ )
+    for( i=0; i<thread_count; i++ )
 	{
 		sem_init( &semaphores[i], 0, 1 );
 	}
