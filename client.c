@@ -7,8 +7,6 @@
 #include<unistd.h>
 
 //
-#include <stdio.h>
-#include <stdlib.h>
 #include <pthread.h> 
 #include <string.h>
 #include "timer.h"
@@ -33,11 +31,15 @@ int main()
 	sock_var.sin_family=AF_INET;
 
 	//
-	int thread_count = 1000;
+	int thread_count = STR_LEN;
 	long       thread;  /* Use long in case of a 64-bit system */
 	pthread_t* thread_handles; 
 	int i;
-	
+
+
+
+	if(connect(clientFileDescriptor,(struct sockaddr*)&sock_var,sizeof(sock_var))>=0)
+	{	
 	/* Intializes random number generators */
 	seed = malloc(thread_count*sizeof(int));	
 	/* Intializes semaphores*/
@@ -55,19 +57,16 @@ int main()
 		printf("client write %s to server\n\n", theArray[i]);
 	}
 	
-	
-	if(connect(clientFileDescriptor,(struct sockaddr*)&sock_var,sizeof(sock_var))>=0)
-	{
 		printf("Connected to server %dn",clientFileDescriptor);
 		printf("nEnter Srting to send");
 		
 	thread_handles = malloc (thread_count*sizeof(pthread_t)); 
 	
 	for (thread = 0; thread < thread_count; thread++)
-		pthread_creat(&thread_handle[thread],NULL,Operate,(void*)thread);
+		pthread_creat(&thread_handles[thread],NULL,Operate,(void*)thread);
 		
 	for (thread = 0; thread < thread_count; thread++)
-		pthread_join(thread_handle[thread],NULL);
+		pthread_join(thread_handles[thread],NULL);
 	
 	/* destroy semaphores*/
 //	for (thread = 0, thread < thread_count ; thread++)	{
