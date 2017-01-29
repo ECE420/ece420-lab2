@@ -7,6 +7,14 @@
 #include<unistd.h>
 #include<pthread.h>
 
+//
+#include <string.h>
+#include "timer.h"
+#define NUM_STR 1024
+#define STR_LEN 1000
+
+char theArray[NUM_STR][STR_LEN];
+
 void *ServerEcho(void *args)
 {
 	int clientFileDescriptor=(int)args;
@@ -26,23 +34,42 @@ int main()
 	int serverFileDescriptor=socket(AF_INET,SOCK_STREAM,0);
 	int clientFileDescriptor;
 	int i;
-	pthread_t t[20];
-
+	//pthread_t t[20];
+	int thread_count = STR_LEN;
+	long thread;
+	pthread* thread_handles;
+	
 	sock_var.sin_addr.s_addr=inet_addr("127.0.0.1");
 	sock_var.sin_port=3000;
 	sock_var.sin_family=AF_INET;
+	
+	
 	if(bind(serverFileDescriptor,(struct sockaddr*)&sock_var,sizeof(sock_var))>=0)
 	{
+	
 		printf("nsocket has been created");
 		listen(serverFileDescriptor,2000); 
+	/*initialize the server theArray*/
+	for (i = 0; i < NUM_STR; i ++)
+	{
+		sprintf(theArray[i], "“String %i: the initial value", i);
+		printf("Initial string in theArray[%i] is %s \n\n",i,theArray[i]);
+	}		
+	/*reserve memory for thread handlers*/
+	thread_handles = malloc (thread_count*sizeof(pthread_t)); 
+		
+
+		
+		
+		
+		
+		
 		while(1)        //loop infinity
 		{
-			for(i=0;i<20;i++)      //can support 20 clients at a time
-			{
+			// we may need to put semaphore_init= 20 here in order to prevent supporting more than 20 clients at one time
 				clientFileDescriptor=accept(serverFileDescriptor,NULL,NULL);
 				printf("nConnected to client %dn",clientFileDescriptor);
-				pthread_create(&t,NULL,ServerEcho,(void *)clientFileDescriptor);
-			}
+				pthread_create(&t,NULL,ServerEcho,(void *)clientFileDescriptor);		
 		}
 		close(serverFileDescriptor);
 	}
