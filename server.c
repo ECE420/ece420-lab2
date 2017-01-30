@@ -14,12 +14,16 @@
 #define STR_LEN 1000
 
 char theArray[NUM_STR][STR_LEN];
+sem_t* semaphores;
+
 
 void *ServerEcho(void *args)
 {
 	int clientFileDescriptor=(int)args;
-	char str[20];
-
+	
+	
+	
+	
 	read(clientFileDescriptor,str,20);
 	printf("nreading from client:%s",str);
 	write(clientFileDescriptor,str,20);
@@ -43,33 +47,34 @@ int main()
 	sock_var.sin_port=3000;
 	sock_var.sin_family=AF_INET;
 	
+	/* allocate memory for semaphores*/
+	semaphores = malloc((thread_count + 1)*sizeof(sem_t));
+	/* semaphore for the server --- one server cannot support more than 20 clients at a time*/
+	sem_int(&semaphores[thread_count + 1],0,20);
+		
 	
 	if(bind(serverFileDescriptor,(struct sockaddr*)&sock_var,sizeof(sock_var))>=0)
 	{
 	
 		printf("nsocket has been created");
 		listen(serverFileDescriptor,2000); 
-	/*initialize the server theArray*/
-	for (i = 0; i < NUM_STR; i ++)
-	{
-		sprintf(theArray[i], "“String %i: the initial value", i);
-		printf("Initial string in theArray[%i] is %s \n\n",i,theArray[i]);
-	}		
-	/*reserve memory for thread handlers*/
-	thread_handles = malloc (thread_count*sizeof(pthread_t)); 
-		
-
-		
-		
-		
-		
+		/*initialize the server theArray*/
+		for (i = 0; i < NUM_STR; i ++)
+		{
+			sprintf(theArray[i], "“String %i: the initial value", i);
+			printf("Initial string in theArray[%i] is %s \n\n",i,theArray[i]);
+		}		
+		/*reserve memory for thread handlers*/
+		thread_handles = malloc (thread_count*sizeof(pthread_t)); 
 		
 		while(1)        //loop infinity
 		{
 			// we may need to put semaphore_init= 20 here in order to prevent supporting more than 20 clients at one time
-				clientFileDescriptor=accept(serverFileDescriptor,NULL,NULL);
-				printf("nConnected to client %dn",clientFileDescriptor);
-				pthread_create(&t,NULL,ServerEcho,(void *)clientFileDescriptor);		
+			sem_wait(&semaphores[thread_count + 1]);
+			clientFileDescriptor=accept(serverFileDescriptor,NULL,NULL);
+			printf("nConnected to client %dn",clientFileDescriptor);
+			pthread_create(&t,NULL,ServerEcho,(void *)clientFileDescriptor);		
+			sem_post(&semaphores[thread_count + 1]);
 		}
 		close(serverFileDescriptor);
 	}

@@ -40,42 +40,42 @@ int main()
 
 	if(connect(clientFileDescriptor,(struct sockaddr*)&sock_var,sizeof(sock_var))>=0)
 	{	
-	/* Intializes random number generators */
-	seed = malloc(thread_count*sizeof(int));	
-	/* Intializes semaphores*/
-//	semaphores = malloc(thread_count*sizeof(sem_t));
-	for (thread = 0, thread < thread_count ; thread++)
-	{
-//		sem_int(&semaphores[thread],0,1);
-		seed[thread] = thread;
-	}	
-	
-	/* Fill in the initial values for theArray */
-	for (i = 0; i < NUM_STR; i ++)
-	{
-		sprintf(theArray[i], "“String %d has been modified by a write request", i);
-		printf("client write %s to server\n\n", theArray[i]);
-	}
-	
-		printf("Connected to server %dn",clientFileDescriptor);
-		printf("nEnter Srting to send");
+		/* Initializes random number generators */
+		seed = malloc(thread_count*sizeof(int));	
+		/* Intializes semaphores*/
+	//	semaphores = malloc(thread_count*sizeof(sem_t));
+		for (thread = 0, thread < thread_count ; thread++)
+		{
+	//		sem_int(&semaphores[thread],0,1);
+			seed[thread] = thread;
+		}	
 		
-	thread_handles = malloc (thread_count*sizeof(pthread_t)); 
-	
-	for (thread = 0; thread < thread_count; thread++)
-		pthread_creat(&thread_handles[thread],NULL,Operate,(void*)thread);
+		/* Fill in the initial values for theArray */
+		for (i = 0; i < NUM_STR; i ++)
+		{
+			sprintf(theArray[i], "“String %d has been modified by a write request", i);
+			printf("client write %s to server\n\n", theArray[i]);
+		}
 		
-	for (thread = 0; thread < thread_count; thread++)
-		pthread_join(thread_handles[thread],NULL);
-	
-	/* destroy semaphores*/
-//	for (thread = 0, thread < thread_count ; thread++)	{
-//		sem_destroy(&semaphores[thread]);
-//	}		
-	
-	/* release memroy*/
-//	free(semaphores);
-	free(thread_handles);
+			printf("Connected to server %dn",clientFileDescriptor);
+			printf("nEnter Srting to send");
+			
+		thread_handles = malloc (thread_count*sizeof(pthread_t)); 
+		
+		for (thread = 0; thread < thread_count; thread++)
+			pthread_creat(&thread_handles[thread],NULL,Operate,(void*)thread);
+			
+		for (thread = 0; thread < thread_count; thread++)
+			pthread_join(thread_handles[thread],NULL);
+		
+		/* destroy semaphores*/
+	//	for (thread = 0, thread < thread_count ; thread++)	{
+	//		sem_destroy(&semaphores[thread]);
+	//	}		
+		
+		/* release memroy*/
+	//	free(semaphores);
+		free(thread_handles);
 	}
 	else{
 		printf("socket creation failed");
