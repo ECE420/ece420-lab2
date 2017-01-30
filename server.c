@@ -56,13 +56,12 @@ int main()
     int clientFileDescriptor;
     int count = 0;
 	int i;
-		
+	pthread_t t[thread_count];
+	
 	if( argc != 2 ) Usage(argv[0]);
 	thread_count = (int)strtol(argv[1], NULL, 10 );
 	if( thread_count <=0 ) Usage(argv[0]);
-	
-	pthread_t t[thread_count];
-	
+		
 		/* Fill in the initial values for theArray */
 	for (i = 0; i < NUM_STR; i ++)
 	{
@@ -91,7 +90,7 @@ int main()
 			thread_id++;
 			
 			printf("nConnected to client %d \n",clientFileDescriptor);
-			pthread_create(&t,NULL,ServerEcho,(void *)&data_array[count]);
+			pthread_create(&t[thread_id],NULL,ServerEcho,(void *)clientFileDescriptor);
 		}
 		
 		for( i=0; i<thread_count; i++ )
@@ -104,5 +103,6 @@ int main()
 	else{
 		printf("nsocket creation failed");
 	}
+	pthread_exit(NULL);
 	return 0;
 }
