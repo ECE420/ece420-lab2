@@ -20,10 +20,25 @@ void Usage( char* prog_name )
 
 void* sending_request(void * rank)
 {
+	struct sockaddr_in sock_var;
+	clientFileDescriptor=socket(AF_INET,SOCK_STREAM,0);
+	
 	char str_clnt[50],str_ser[50];
 	int row_num;
 	int read_write_probability;
 	long my_rank = (long) rank;
+	
+	if(connect(clientFileDescriptor,(struct sockaddr*)&sock_var,sizeof(sock_var))>=0)
+	{
+		printf("Connected to server %dn",clientFileDescriptor);
+	}
+	else{
+		printf("socket creation failed");
+	}
+	
+	sock_var.sin_addr.s_addr=inet_addr("127.0.0.1");
+	sock_var.sin_port=3000;
+	sock_var.sin_family=AF_INET;
 	
 	row_num = rand_r(&seed[my_rank]) % NUM_STR;
 	read_write_probability = rand_r(&seed[my_rank]) % 20;
@@ -44,14 +59,8 @@ void* sending_request(void * rank)
 
 int main()
 {
-	struct sockaddr_in sock_var;
-	clientFileDescriptor=socket(AF_INET,SOCK_STREAM,0);
 	long       thread;  /* Use long in case of a 64-bit system */
 	pthread_t t[thread_count];
-
-	sock_var.sin_addr.s_addr=inet_addr("127.0.0.1");
-	sock_var.sin_port=3000;
-	sock_var.sin_family=AF_INET;
 	
 	/* Intializes random number generators */
 	seed = malloc(thread_count*sizeof(int));
@@ -62,15 +71,10 @@ int main()
 	thread_count = (int)strtol(argv[1], NULL, 10 );
 	if( thread_count <=0 ) Usage(argv[0]);
 
-	if(connect(clientFileDescriptor,(struct sockaddr*)&sock_var,sizeof(sock_var))>=0)
-	{
-		printf("Connected to server %dn",clientFileDescriptor);
-		for (thread = 0; thread < thread_count; thread++)  
-			pthread_create(&t[thread],NULL,sending_request,(void *)thread);
-	}
-	else{
-		printf("socket creation failed");
-	}
+	for (thread = 0; thread < thread_count; thread++)  
+		pthread_create(&t[thread],NULL,sending_request,(void *)thread);
+		
+
 	pthread_exit(NULL);
 	return 0;
 }
