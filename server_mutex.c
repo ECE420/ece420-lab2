@@ -29,7 +29,7 @@ void *ServerEcho(void *args)
 	printf("reading from client:%s",str);
 	
 	/* Parse the input string from client side */
-	sscanf(str, "%d%4d", &read_or_write, &row_num );
+	sscanf(str, "%d%5d", &read_or_write, &row_num );
 	printf("The received command in server side is %d, row: %d\n", read_or_write, row_num );
 	
 	if( read_or_write == 0 )  //Read

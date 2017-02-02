@@ -11,7 +11,7 @@
 #include <string.h>
 #include "timer.h"
 #define NUM_STR 1024
-#define STR_LEN 20
+#define STR_LEN 1000
 
 //
 int* seed;
@@ -71,13 +71,13 @@ void *Operate(void* rand){
 		if (randNum >= 95) //5% are write operations, others are write
 		{
 		    read_or_write = 1;				
-		    sprintf(str_clnt, "%d%4d", read_or_write, pos );
+		    sprintf(str_clnt, "%d%5d", read_or_write, pos );
 		    printf("The rand number is %d and the command send is %s\n", randNum, str_clnt);
 		}
 		else
 		{
 		    read_or_write = 0;
-		    sprintf(str_clnt, "%d%4d", read_or_write, pos );
+		    sprintf(str_clnt, "%d%5d", read_or_write, pos );
 		    printf("The rand number is %d and the command send is %s\n", randNum, str_clnt);
 		}
 		write(clientFileDescriptor,str_clnt,20);
