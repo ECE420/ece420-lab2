@@ -6,29 +6,25 @@
 #include<arpa/inet.h>
 #include<unistd.h>
 #include<pthread.h>
+#include<string.h>
+#include "timer.h"
+#include<semaphore.h>
 
 #define NUM_STR 1024
 #define STR_LEN 1000
 
 char theArray[NUM_STR][STR_LEN];
 static int thread_id = -1;
-static int thread_count;
 sem_t* semaphores;
-
-void Usage( char* prog_name )
-{
-	fprintf(stderr, "usage: %s <number of threads> \n", prog_name );
-	exit(0);
-}
 
 void *ServerEcho(void *args)
 {
-	int clientFileDescriptor = (int)args;
+	int* clientFileDescriptor = (int*)args;
 	char str[50];
 	int read_or_write, row_num;
 	
 	sem_wait( &semaphores[thread_id] );
-	read(clientFileDescriptor,str,50);
+	read(*clientFileDescriptor,str,50);
 	printf("nreading from client:%s",str);
 	
 	/* Parse the input string from client side */
@@ -37,41 +33,39 @@ void *ServerEcho(void *args)
 	
 	if( read_or_write == 0 )  //Read
 	{
-		write(clientFileDescriptor,theArray[row_num],50);
+		write(*clientFileDescriptor,theArray[row_num],50);
 	}
 	else // Write
 	{
 		sprintf( theArray[row_num], "String %d has been modified by a write request", row_num );
-		write(clientFileDescriptor,theArray[row_num],50);
+		write(*clientFileDescriptor,theArray[row_num],50);
 	}
-	close(clientFileDescriptor);
+	close(*clientFileDescriptor);
 	sem_post( &semaphores[thread_id] );
+	pthread_exit(NULL);
 }
 
 
-int main()
+int main(int argc, char* argv[])
 {
 	struct sockaddr_in sock_var;
 	int serverFileDescriptor=socket(AF_INET,SOCK_STREAM,0);
-    int clientFileDescriptor;
-    int count = 0;
+        int* clientFileDescriptor;
 	int i;
-	pthread_t t[thread_count];
+	pthread_t* t;
 	
-	if( argc != 2 ) Usage(argv[0]);
-	thread_count = (int)strtol(argv[1], NULL, 10 );
-	if( thread_count <=0 ) Usage(argv[0]);
-		
-		/* Fill in the initial values for theArray */
+	/* Fill in the initial values for theArray */
 	for (i = 0; i < NUM_STR; i ++)
 	{
-		sprintf(theArray[i], "String %d: the initial value", i);
-		printf("%s\n\n", theArray[i]);
+	    sprintf(theArray[i], "String %d: the initial value", i);
+            //printf("%s\n\n", theArray[i]);
 	}
 	
-	semaphores = malloc( thread_count * sizeof(sem_t) );
-	
-    for( i=0; i<thread_count; i++ )
+	t = malloc( STR_LEN * sizeof(pthread_t));
+	semaphores = malloc( STR_LEN * sizeof(sem_t) );
+	clientFileDescriptor = malloc( sizeof(int));
+
+    for( i=0; i<STR_LEN; i++ )
 	{
 		sem_init( &semaphores[i], 0, 1 );
 	}
@@ -85,24 +79,27 @@ int main()
 		listen(serverFileDescriptor,2000); 
 		while(1)        //loop infinity
 		{
-			clientFileDescriptor=accept(serverFileDescriptor,NULL,NULL);
+		    *clientFileDescriptor=accept(serverFileDescriptor,NULL,NULL);
 			
-			thread_id++;
+		    thread_id++;
 			
-			printf("nConnected to client %d \n",clientFileDescriptor);
-			pthread_create(&t[thread_id],NULL,ServerEcho,(void *)clientFileDescriptor);
+		    printf("nConnected to client %d \n",*clientFileDescriptor);
+		    pthread_create(&t[thread_id],NULL,ServerEcho,(void *)clientFileDescriptor);
+
+		    pthread_join(t[thread_id],NULL);
 		}
 		
-		for( i=0; i<thread_count; i++ )
+		for( i=0; i<STR_LEN; i++ )
 		{
-			sem_destory( &semaphores[i] );
+		    sem_destroy( &semaphores[i] );
 		}
 		close(serverFileDescriptor);
 		free(semaphores);
+		free(clientFileDescriptor);
 	}
 	else{
 		printf("nsocket creation failed");
-	}
+	    }
 	pthread_exit(NULL);
 	return 0;
 }
