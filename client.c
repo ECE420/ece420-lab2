@@ -59,14 +59,14 @@ void *Operate(void* rand){
 	int clientFileDescriptor=socket(AF_INET,SOCK_STREAM,0);
 	char read_back[STR_LEN];
 	char str_clnt[20];
-	char str_clnt[50];
+	char str_ser[50];
 	
 	sock_var.sin_addr.s_addr=inet_addr("127.0.0.1");
 	sock_var.sin_port=3000;
 	sock_var.sin_family=AF_INET;
 	if(connect(clientFileDescriptor,(struct sockaddr*)&sock_var,sizeof(sock_var))>=0)
 	{	
-		printf("Connected to server %dn",clientFileDescriptor);
+	//	printf("Connected to server %dn",clientFileDescriptor);
 		
 		if (randNum >= 95) //95% are read operations, others are write
 		{	
@@ -77,10 +77,10 @@ void *Operate(void* rand){
 		}
 		write(clientFileDescriptor,str_clnt,20);
 		read(clientFileDescriptor,str_ser,50);
-		printf("String from Server: %s",str_ser);
+		printf("String from Server: %s\n",str_ser);
 	}
 	else{
-		printf("socket creation failed");
+		printf("socket creation failed\n");
 	}
 	close(clientFileDescriptor);
 	return NULL;

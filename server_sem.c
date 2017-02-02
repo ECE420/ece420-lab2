@@ -24,13 +24,13 @@ void *ServerEcho(void *args)
 	char str[20];
 	int read_or_write, row_num;
 	
-	sem_wait( &semaphores[thread_id] );
+	sem_wait( &semaphores[thread_number] );
 	read(*clientFileDescriptor,str,20);
-	printf("nreading from client:%s",str);
+	//printf("nreading from client:%s",str);
 	
 	/* Parse the input string from client side */
 	sscanf(str, "%d%4d", &read_or_write, &row_num );
-	printf("The received command in server side is %d, row: %d", read_or_write, row_num );
+	printf("The received command in server side is %d, row: %d\n", read_or_write, row_num );
 	
 	if( read_or_write == 0 )  //Read
 	{
@@ -41,7 +41,7 @@ void *ServerEcho(void *args)
 		sprintf( theArray[row_num], "String %d has been modified by a write request", row_num );
 		write(*clientFileDescriptor,theArray[row_num],50);
 	}
-	sem_post( &semaphores[thread_id] );
+	sem_post( &semaphores[thread_number] );
 	close(*clientFileDescriptor);	
 	pthread_exit(NULL);
 }
@@ -105,7 +105,7 @@ int main()
 		close(serverFileDescriptor);
 	}
 	else{
-		printf("n server socket creation failed");
+		printf("n server socket creation failed\n");
 	}
 	return 0;
 }
