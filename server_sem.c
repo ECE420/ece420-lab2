@@ -6,6 +6,7 @@
 #include<arpa/inet.h>
 #include<unistd.h>
 #include<pthread.h>
+#include<semaphore.h>
 
 //
 #include <string.h>
@@ -15,11 +16,10 @@
 
 char theArray[NUM_STR][STR_LEN];
 sem_t* semaphores;
-
+int thread_number = 0;
 
 void *ServerEcho(void *args)
 {
-	long rank = (long) arg;
 	int clientFileDescriptor=(int)args;
 	char str[20];
 	/*generate random number in range of 1024*/
@@ -53,49 +53,52 @@ int main()
 	int i;
 	//pthread_t t[20];
 	int thread_count = STR_LEN;
-	long thread;
-	pthread* thread_handles;
-	
+	pthread_t* thread_handles;
 	sock_var.sin_addr.s_addr=inet_addr("127.0.0.1");
 	sock_var.sin_port=3000;
 	sock_var.sin_family=AF_INET;
+
 	
 	/* allocate memory for semaphores*/
 	semaphores = malloc((thread_count + 1)*sizeof(sem_t));
 	/* semaphore for the server --- one server cannot support more than 20 clients at a time*/
-	sem_int(&semaphores[thread_count + 1],0,20);
+	sem_init(&semaphores[thread_count + 1],0,20);
 	/* semaphores initialization*/
 	for (i=0; i<thread_count; i++){
-		sem_int(&semaphores[i],0,1);
+		sem_init(&semaphores[i],0,1);
 	}
 	
+	/* theArray initial*/
+	for (i = 0; i < NUM_STR; i ++)
+	{
+		sprintf(theArray[i], "“String %i: the initial value", i);
+		printf("Initial string in theArray[%i] is %s \n\n",i,theArray[i]);
+	}		
+
+	/*reserve memory for thread handlers*/
+	thread_handles = malloc (thread_count*sizeof(pthread_t)); 
+
 	if(bind(serverFileDescriptor,(struct sockaddr*)&sock_var,sizeof(sock_var))>=0)
 	{
 	
-		printf("nsocket has been created");
+		printf("n server socket has been created");
 		listen(serverFileDescriptor,2000); 
 		/*initialize the server theArray*/
-		for (i = 0; i < NUM_STR; i ++)
-		{
-			sprintf(theArray[i], "“String %i: the initial value", i);
-			printf("Initial string in theArray[%i] is %s \n\n",i,theArray[i]);
-		}		
-		/*reserve memory for thread handlers*/
-		thread_handles = malloc (thread_count*sizeof(pthread_t)); 
 		
 		while(1)        //loop infinity
 		{
-			// we may need to put semaphore_init= 20 here in order to prevent supporting more than 20 clients at one time
 			sem_wait(&semaphores[thread_count + 1]);
 			clientFileDescriptor=accept(serverFileDescriptor,NULL,NULL);
 			printf("nConnected to client %dn",clientFileDescriptor);
-			pthread_create(&t,NULL,ServerEcho,(void *)clientFileDescriptor);		
+			pthread_create(&thread_handles[thread_number],NULL,ServerEcho,(void *)clientFileDescriptor);		
+			pthread_join(thread_handles[thread_number],NULL);
+			thread_number++;
 			sem_post(&semaphores[thread_count + 1]);
 		}
 		close(serverFileDescriptor);
 	}
 	else{
-		printf("nsocket creation failed");
+		printf("n server socket creation failed");
 	}
 	return 0;
 }
