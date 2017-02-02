@@ -40,8 +40,8 @@ void *ServerEcho(void *args)
 		sprintf( theArray[row_num], "String %d has been modified by a write request", row_num );
 		write(*clientFileDescriptor,theArray[row_num],50);
 	}
-	close(*clientFileDescriptor);
 	sem_post( &semaphores[thread_id] );
+	close(*clientFileDescriptor);	
 	pthread_exit(NULL);
 }
 
@@ -50,10 +50,18 @@ int main(int argc, char* argv[])
 {
 	struct sockaddr_in sock_var;
 	int serverFileDescriptor=socket(AF_INET,SOCK_STREAM,0);
-        int* clientFileDescriptor;
+    int* clientFileDescriptor;
 	int i;
 	pthread_t* t;
 	
+	sock_var.sin_addr.s_addr=inet_addr("127.0.0.1");
+	sock_var.sin_port=3000;
+	sock_var.sin_family=AF_INET;
+		
+	t = malloc( STR_LEN * sizeof(pthread_t));
+	semaphores = malloc( STR_LEN * sizeof(sem_t) );
+	clientFileDescriptor = malloc( sizeof(int));
+
 	/* Fill in the initial values for theArray */
 	for (i = 0; i < NUM_STR; i ++)
 	{
@@ -61,18 +69,12 @@ int main(int argc, char* argv[])
             //printf("%s\n\n", theArray[i]);
 	}
 	
-	t = malloc( STR_LEN * sizeof(pthread_t));
-	semaphores = malloc( STR_LEN * sizeof(sem_t) );
-	clientFileDescriptor = malloc( sizeof(int));
-
     for( i=0; i<STR_LEN; i++ )
 	{
 		sem_init( &semaphores[i], 0, 1 );
 	}
 	
-	sock_var.sin_addr.s_addr=inet_addr("127.0.0.1");
-	sock_var.sin_port=3000;
-	sock_var.sin_family=AF_INET;
+
 	if(bind(serverFileDescriptor,(struct sockaddr*)&sock_var,sizeof(sock_var))>=0)
 	{
 		printf("nsocket has been created");

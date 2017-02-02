@@ -32,25 +32,24 @@ void* sending_request(void * rank)
 	if(connect(clientFileDescriptor,(struct sockaddr*)&sock_var,sizeof(sock_var))>=0)
 	{
 		printf("Connected to server %dn",clientFileDescriptor);
+		row_num = rand_r(&seed[my_rank]) % NUM_STR;
+		rand_num = rand_r(&seed[my_rank]) % 20;
+		
+		if (rand_num >= 20) // 5% are write operations, others are reads
+		{
+			sprintf(str_clnt, "1%4d", row_num );
+		}
+		else
+		{
+			sprintf(str_clnt, "0%4d", row_num );
+		}	
+		write(clientFileDescriptor,str_clnt,50);
+		read(clientFileDescriptor,str_ser,50);
+		printf("String from Server: %s",str_ser);
 	}
 	else{
 		printf("socket creation failed");
-	}
-	
-	row_num = rand_r(&seed[my_rank]) % NUM_STR;
-	rand_num = rand_r(&seed[my_rank]) % 20;
-	
-	if (rand_num >= 20) // 5% are write operations, others are reads
-	{
-		sprintf(str_clnt, "1%4d", row_num );
-	}
-	else
-	{
-		sprintf(str_clnt, "0%4d", row_num );
 	}	
-	write(clientFileDescriptor,str_clnt,50);
-	read(clientFileDescriptor,str_ser,50);
-	printf("String from Server: %s",str_ser);
 	close(clientFileDescriptor);
 }
 
@@ -71,7 +70,7 @@ int main()
 	for (thread = 0; thread < thread_count; thread++)  
 		pthread_create(&t[thread],NULL,sending_request,(void *)thread);
 		
-        for( thread=0; thread< thread_count; thread++)
+    for( thread=0; thread< thread_count; thread++)
 		pthread_join(t[thread], NULL);
 
 	free(t);
