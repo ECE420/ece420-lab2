@@ -69,11 +69,13 @@ void *Operate(void* rand){
 	//	printf("Connected to server %dn",clientFileDescriptor);
 		
 		if (randNum >= 95) //95% are read operations, others are write
-		{	
+		{				
 			sprintf(str_clnt, "1%4d", pos );
+			printf("The rand number is %d and the command send is %s", randNum, str_clnt);
 		}
 		else{
 			sprintf(str_clnt, "0%4d", pos );
+			printf("The rand number is %d and the command send is %s", randNum, str_clnt);
 		}
 		write(clientFileDescriptor,str_clnt,20);
 		read(clientFileDescriptor,str_ser,50);

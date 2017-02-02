@@ -26,7 +26,7 @@ void *ServerEcho(void *args)
 	
 	sem_wait( &semaphores[thread_number] );
 	read(*clientFileDescriptor,str,20);
-	//printf("nreading from client:%s",str);
+	printf("reading from client:%s",str);
 	
 	/* Parse the input string from client side */
 	sscanf(str, "%d%4d", &read_or_write, &row_num );
