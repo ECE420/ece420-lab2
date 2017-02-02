@@ -24,8 +24,9 @@ pthread_mutex_t mutex;
 int thread_number = -1;
 double start[NUM_STR],finish[NUM_STR], elapsed[NUM_STR];	
 double sum = 0;
-
 Passin_value passin[NUM_STR];
+
+FILE *f;
 
 void *ServerEcho(void *args)
 {
@@ -127,12 +128,12 @@ int main()
 	else{
 		printf("n server socket creation failed\n");
 	}
-	for (i = 0; i < 5; i++){
-		printf("Original elapse is %f\n",elapsed[i]);		
-	}
+	f = fopen("the_array_2.txt","w");
 	for (i = 0; i < NUM_STR; i++){		
 		sum += elapsed[i];
+		fprintf(f,"%s \n",theArray[i]);
 	}
+	
 	printf("The server_mutex takes %f \n", sum);
 	return 0;
 }
