@@ -20,29 +20,29 @@ int thread_number = -1;
 
 void *ServerEcho(void *args)
 {
-	int* clientFileDescriptor = (int*)args;
+	int clientFileDescriptor = (int)args;
 	char str[20];
 	int read_or_write, row_num;
 	
 	pthread_mutex_lock(&mutex);
-	read(*clientFileDescriptor,str,20);
+	read(clientFileDescriptor,str,20);
 	printf("reading from client:%s",str);
 	
 	/* Parse the input string from client side */
 	sscanf(str, "%d%4d", &read_or_write, &row_num );
 	printf("The received command in server side is %d, row: %d\n", read_or_write, row_num );
 	
-	if( read_or_write == 1 )  //Read
+	if( read_or_write == 0 )  //Read
 	{
-	    write(*clientFileDescriptor,theArray[row_num],50);
+	    write(clientFileDescriptor,theArray[row_num],50);
 	}
 	else // Write
 	{
-	    sprintf( theArray[row_num], "String %d has been modified by a write request", row_num );
-	    write(*clientFileDescriptor,theArray[row_num],50);
+	    sprintf( theArray[row_num], "String %d has been modified by a write request", thread_number );
+	    write(clientFileDescriptor,theArray[row_num],50);
 	}
 	pthread_mutex_unlock(&mutex);
-	close(*clientFileDescriptor);	
+	close(clientFileDescriptor);	
 	pthread_exit(NULL);
 }
 
@@ -64,7 +64,7 @@ int main()
 	/* theArray initial*/
 	for (i = 0; i < NUM_STR; i ++)
 	{
-	    sprintf(theArray[i], "“String %i: the initial value", i);
+	    sprintf(theArray[i], "String %i: the initial value", i);
 	    //printf("Initial string in theArray[%i] is %s \n\n",i,theArray[i]);
 	}		
 	

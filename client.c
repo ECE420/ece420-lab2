@@ -59,6 +59,7 @@ void *Operate(void* rand){
 	char read_back[STR_LEN];
 	char str_clnt[20];
 	char str_ser[50];
+	int read_or_write;
 	
 	sock_var.sin_addr.s_addr=inet_addr("127.0.0.1");
 	sock_var.sin_port=3000;
@@ -67,14 +68,17 @@ void *Operate(void* rand){
 	{	
 	//	printf("Connected to server %dn",clientFileDescriptor);
 		
-		if (randNum >= 95) //95% are read operations, others are write
-		{				
-			sprintf(str_clnt, "1%4d", pos );
-			printf("The rand number is %d and the command send is %s\n", randNum, str_clnt);
+		if (randNum >= 95) //5% are write operations, others are write
+		{
+		    read_or_write = 1;				
+		    sprintf(str_clnt, "%d%4d", read_or_write, pos );
+		    printf("The rand number is %d and the command send is %s\n", randNum, str_clnt);
 		}
-		else{
-			sprintf(str_clnt, "0%4d", pos );
-			printf("The rand number is %d and the command send is %s\n", randNum, str_clnt);
+		else
+		{
+		    read_or_write = 0;
+		    sprintf(str_clnt, "%d%4d", read_or_write, pos );
+		    printf("The rand number is %d and the command send is %s\n", randNum, str_clnt);
 		}
 		write(clientFileDescriptor,str_clnt,20);
 		read(clientFileDescriptor,str_ser,50);
