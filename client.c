@@ -14,7 +14,6 @@
 #define STR_LEN 1000
 
 //
-char theArray[NUM_STR][STR_LEN];
 int* seed;
 void *Operate(void* rank);  /* Thread function */
 char WRITE[20];
@@ -37,14 +36,7 @@ int main()
 	{
 		seed[thread] = thread;
 	}	
-	
-	/* Fill in the initial values for theArray */
-	for (i = 0; i < NUM_STR; i ++)
-	{
-		sprintf(theArray[i], "String %d has been modified by a write request", i);
-	//	printf("client write %s to server\n\n", theArray[i]);
-	}
-			
+				
 	thread_handles = malloc (thread_count*sizeof(pthread_t)); 
 	
 	for (thread = 0; thread < thread_count; thread++)
@@ -59,13 +51,15 @@ int main()
 
 void *Operate(void* rand){
 	long my_rand = (long) rand;
-	// Find a random position in theArray for read or write
+	
 	int pos = rand_r(&seed[my_rand]) % NUM_STR;  
 	int randNum = rand_r(&seed[my_rand]) % 100;
 	/*connet to server*/	
 	struct sockaddr_in sock_var;
 	int clientFileDescriptor=socket(AF_INET,SOCK_STREAM,0);
 	char read_back[STR_LEN];
+	char str_clnt[20];
+	char str_clnt[50];
 	
 	sock_var.sin_addr.s_addr=inet_addr("127.0.0.1");
 	sock_var.sin_port=3000;
@@ -73,19 +67,17 @@ void *Operate(void* rand){
 	if(connect(clientFileDescriptor,(struct sockaddr*)&sock_var,sizeof(sock_var))>=0)
 	{	
 		printf("Connected to server %dn",clientFileDescriptor);
-		printf("thread %d :randNum = %d ,pos = %d\n",my_rand,randNum,pos);
 		
-		if (randNum >= 95) //95% are write operations, others are read
+		if (randNum >= 95) //95% are read operations, others are write
 		{	
-			write(clientFileDescriptor,WRITE,1);
-			/*send random */
-			write(clientFileDescriptor,theArray[pos],STR_LEN);
+			sprintf(str_clnt, "1%4d", pos );
 		}
 		else{
-			write(clientFileDescriptor,READ,1);
-			read(clientFileDescriptor,read_back,STR_LEN);
-			printf("%s",read_back);
+			sprintf(str_clnt, "0%4d", pos );
 		}
+		write(clientFileDescriptor,str_clnt,20);
+		read(clientFileDescriptor,str_ser,50);
+		printf("String from Server: %s",str_ser);
 	}
 	else{
 		printf("socket creation failed");

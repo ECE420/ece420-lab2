@@ -16,32 +16,34 @@
 
 char theArray[NUM_STR][STR_LEN];
 sem_t* semaphores;
-int thread_number = 0;
+int thread_number = -1;
 
 void *ServerEcho(void *args)
 {
-	int clientFileDescriptor=(int)args;
+	int* clientFileDescriptor = (int*)args;
 	char str[20];
-	/*generate random number in range of 1024*/
-	int pos = rand_r(NUM_STR);
+	int read_or_write, row_num;
 	
-	read(clientFileDescriptor,str,20);
+	sem_wait( &semaphores[thread_id] );
+	read(*clientFileDescriptor,str,20);
 	printf("nreading from client:%s",str);
-	/*if read*/
-	if (str == 0){
-		sem_wait(&semaphores[pos]);
-		write(clientFileDescriptor,theArray[pos],STR_LEN);
-		sem_post(&semaphores[pos]);
-	}
-	/*if write*/
-	else{
-		sem_wait(&semaphores[pos]);
-		read(clientFileDescriptor,theArray[pos],STR_LEN);
-		sem_post(&semaphores[pos]);
-	}
 	
-	printf("nechoing back to client");
-	close(clientFileDescriptor);
+	/* Parse the input string from client side */
+	sscanf(str, "%d%4d", &read_or_write, &row_num );
+	printf("The received command in server side is %d, row: %d", read_or_write, row_num );
+	
+	if( read_or_write == 0 )  //Read
+	{
+		write(*clientFileDescriptor,theArray[row_num],50);
+	}
+	else // Write
+	{
+		sprintf( theArray[row_num], "String %d has been modified by a write request", row_num );
+		write(*clientFileDescriptor,theArray[row_num],50);
+	}
+	sem_post( &semaphores[thread_id] );
+	close(*clientFileDescriptor);	
+	pthread_exit(NULL);
 }
 
 
@@ -51,7 +53,6 @@ int main()
 	int serverFileDescriptor=socket(AF_INET,SOCK_STREAM,0);
 	int clientFileDescriptor;
 	int i;
-	//pthread_t t[20];
 	int thread_count = STR_LEN;
 	pthread_t* thread_handles;
 	sock_var.sin_addr.s_addr=inet_addr("127.0.0.1");
@@ -60,7 +61,7 @@ int main()
 
 	
 	/* allocate memory for semaphores*/
-	semaphores = malloc((thread_count + 1)*sizeof(sem_t));
+	semaphores = malloc((thread_count+1)*sizeof(sem_t));
 	/* semaphore for the server --- one server cannot support more than 20 clients at a time*/
 	sem_init(&semaphores[thread_count + 1],0,20);
 	/* semaphores initialization*/
@@ -72,7 +73,7 @@ int main()
 	for (i = 0; i < NUM_STR; i ++)
 	{
 		sprintf(theArray[i], "“String %i: the initial value", i);
-		printf("Initial string in theArray[%i] is %s \n\n",i,theArray[i]);
+		//printf("Initial string in theArray[%i] is %s \n\n",i,theArray[i]);
 	}		
 
 	/*reserve memory for thread handlers*/
@@ -81,7 +82,7 @@ int main()
 	if(bind(serverFileDescriptor,(struct sockaddr*)&sock_var,sizeof(sock_var))>=0)
 	{
 	
-		printf("n server socket has been created");
+		//printf("n server socket has been created");
 		listen(serverFileDescriptor,2000); 
 		/*initialize the server theArray*/
 		
@@ -89,11 +90,17 @@ int main()
 		{
 			sem_wait(&semaphores[thread_count + 1]);
 			clientFileDescriptor=accept(serverFileDescriptor,NULL,NULL);
-			printf("nConnected to client %dn",clientFileDescriptor);
+			//printf("nConnected to client %dn",clientFileDescriptor);
+			thread_number++;
 			pthread_create(&thread_handles[thread_number],NULL,ServerEcho,(void *)clientFileDescriptor);		
 			pthread_join(thread_handles[thread_number],NULL);
-			thread_number++;
+			
 			sem_post(&semaphores[thread_count + 1]);
+		}
+		
+		for( i=0; i<STR_LEN; i++ )
+		{
+		    sem_destroy( &semaphores[i] );
 		}
 		close(serverFileDescriptor);
 	}
