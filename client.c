@@ -20,7 +20,7 @@ void *Operate(void* rank);  /* Thread function */
 int main()
 {
 	//
-	int thread_count = STR_LEN;
+	int thread_count = NUM_STR;
 	long       thread;  /* Use long in case of a 64-bit system */
 	pthread_t* thread_handles; 
 
@@ -72,20 +72,20 @@ void *Operate(void* rand){
 		{
 		    read_or_write = 1;				
 		    sprintf(str_clnt, "%d%5d", read_or_write, pos );
-		    printf("The rand number is %d and the command send is %s\n", randNum, str_clnt);
+		    //printf("The rand number is %d and the command send is %s\n", randNum, str_clnt);
 		}
 		else
 		{
 		    read_or_write = 0;
 		    sprintf(str_clnt, "%d%5d", read_or_write, pos );
-		    printf("The rand number is %d and the command send is %s\n", randNum, str_clnt);
+		    //printf("The rand number is %d and the command send is %s\n", randNum, str_clnt);
 		}
 		write(clientFileDescriptor,str_clnt,20);
 		read(clientFileDescriptor,str_ser,50);
-		printf("String from Server: %s\n",str_ser);
+		//printf("String from Server: %s\n",str_ser);
 	}
 	else{
-		printf("socket creation failed\n");
+		//printf("socket creation failed\n");
 	}
 	close(clientFileDescriptor);
 	return NULL;
