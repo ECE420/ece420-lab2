@@ -15,7 +15,7 @@
 #define STR_LEN 1000
 
 char theArray[NUM_STR][STR_LEN];
-sem_t* semaphores;
+pthread_mutex_t mutex;
 int thread_number = -1;
 
 void *ServerEcho(void *args)
@@ -24,7 +24,7 @@ void *ServerEcho(void *args)
 	char str[20];
 	int read_or_write, row_num;
 	
-	sem_wait( &semaphores[thread_number] );
+	pthread_mutex_lock(&mutex);
 	read(*clientFileDescriptor,str,20);
 	printf("reading from client:%s",str);
 	
@@ -41,7 +41,7 @@ void *ServerEcho(void *args)
 	    sprintf( theArray[row_num], "String %d has been modified by a write request", row_num );
 	    write(*clientFileDescriptor,theArray[row_num],50);
 	}
-	sem_post( &semaphores[thread_number] );
+	pthread_mutex_unlock(&mutex);
 	close(*clientFileDescriptor);	
 	pthread_exit(NULL);
 }
@@ -60,14 +60,6 @@ int main()
 	sock_var.sin_family=AF_INET;
 
 	
-	/* allocate memory for semaphores*/
-	semaphores = malloc((thread_count+1)*sizeof(sem_t));
-	/* semaphore for the server --- one server cannot support more than 20 clients at a time*/
-	sem_init(&semaphores[thread_count],0,20);
-	/* semaphores initialization*/
-	for (i=0; i<thread_count; i++){
-	    sem_init(&semaphores[i],0,1);
-	}
 	
 	/* theArray initial*/
 	for (i = 0; i < NUM_STR; i ++)
@@ -75,6 +67,8 @@ int main()
 	    sprintf(theArray[i], "“String %i: the initial value", i);
 	    //printf("Initial string in theArray[%i] is %s \n\n",i,theArray[i]);
 	}		
+	
+	pthread_mutex_init(&mutex, NULL);
 
 	/*reserve memory for thread handlers*/
 	thread_handles = malloc (thread_count*sizeof(pthread_t)); 
@@ -88,20 +82,17 @@ int main()
 		
 	    while(1)        //loop infinity
 	    {
-	    //	sem_wait(&semaphores[thread_count + 1]);
+
 		clientFileDescriptor=accept(serverFileDescriptor,NULL,NULL);                                                              		        //printf("nConnected to client %dn",clientFileDescriptor);
 	 	thread_number++;
 		printf("The thread number is %d\n", thread_number);
 		pthread_create(&thread_handles[thread_number],NULL,ServerEcho,(void *)clientFileDescriptor);		
 		
-	//	sem_post(&semaphores[thread_count + 1]);
+
 	    }
 		
 		//pthread_join(thread_handles[thread_number],NULL);
-		for( i=0; i<STR_LEN; i++ )
-		{
-		    sem_destroy( &semaphores[i] );
-		}
+		pthread_mutex_destroy(&mutex);
 		close(serverFileDescriptor);
 	}
 	else{
