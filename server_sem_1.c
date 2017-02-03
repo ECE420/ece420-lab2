@@ -20,7 +20,7 @@ typedef struct{
 }Passin_value;
 
 char theArray[NUM_STR][STR_LEN];
-pthread_mutex_t mutex;
+sem_t* semaphores;
 int thread_number = -1;
 double start[NUM_STR],finish[NUM_STR], elapsed[NUM_STR];	
 double sum = 0;
@@ -41,7 +41,9 @@ void *ServerEcho(void *args)
 	thread_id = my_passin->thread_number;
 	//printf("The pass in thread id is %d \n", thread_id);
 	GET_TIME(start[thread_id]);
-	pthread_mutex_lock(&mutex);
+
+	sem_wait( &semaphores[thread_id] );
+
 	read(clientFileDescriptor,str,20);
 	//printf("reading from client:%s",str);
 	
@@ -58,7 +60,7 @@ void *ServerEcho(void *args)
 	    sprintf( theArray[row_num], "String %d has been modified by a write request", thread_number );
 	    write(clientFileDescriptor,theArray[row_num],50);
 	}
-	pthread_mutex_unlock(&mutex);
+	sem_post( &semaphores[thread_id] );
 	GET_TIME(finish[thread_id]);	
 	elapsed[thread_id] = finish[thread_id] - start[thread_id];
 
@@ -87,6 +89,11 @@ int main()
 	     finish[i] = 0;
 	     elapsed[i] = 0;
 	}	
+	semaphores = malloc((thread_count)*sizeof(sem_t));
+	for (i=0; i<thread_count; i++){
+	    sem_init(&semaphores[i],0,1);
+	}
+
 
 	/* theArray initial*/
 	for (i = 0; i < NUM_STR; i ++)
@@ -95,7 +102,6 @@ int main()
 	    //printf("Initial string in theArray[%i] is %s \n\n",i,theArray[i]);
 	}		
 	
-	pthread_mutex_init(&mutex, NULL);
 
 	/*reserve memory for thread handlers*/
 	thread_handles = malloc (thread_count*sizeof(pthread_t)); 
@@ -122,18 +128,22 @@ int main()
 	    }
 		
 		//pthread_join(thread_handles[thread_number],NULL);
-		pthread_mutex_destroy(&mutex);
+				//pthread_join(thread_handles[thread_number],NULL);
+		//for( i=0; i<STR_LEN; i++ )
+		//{
+		//    sem_destroy( &semaphores[i] );
+		//}
 		close(serverFileDescriptor);
 	}
 	else{
 		printf("n server socket creation failed\n");
-	}
-	f = fopen("the_array_1.txt","w");
+	    }
+	f = fopen("the_array_sem_1.txt","w");
 	for (i = 0; i < NUM_STR; i++){		
 		sum += elapsed[i];
 		fprintf(f,"%s \n",theArray[i]);
 	}
 	
-	printf("The server_mutex takes %f \n", sum);
+	printf("The server_sem takes %f \n", sum);
 	return 0;
 }
