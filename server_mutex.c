@@ -11,8 +11,9 @@
 //
 #include <string.h>
 #include "timer.h"
-#define NUM_STR 1024
-#define STR_LEN 1000
+#define NUM_STR 1000
+#define STR_LEN 50
+#define THREAD_COUNT 1000
 
 typedef struct{
     int clientFileDescriptor;
@@ -22,9 +23,9 @@ typedef struct{
 char theArray[NUM_STR][STR_LEN];
 pthread_mutex_t mutex;
 int thread_number = -1;
-double start[NUM_STR],finish[NUM_STR], elapsed[NUM_STR];	
+double start[THREAD_COUNT],finish[THREAD_COUNT], elapsed[THREAD_COUNT];	
 double sum = 0;
-Passin_value passin[NUM_STR];
+Passin_value passin[THREAD_COUNT];
 
 FILE *f;
 
@@ -74,7 +75,7 @@ int main()
 	int serverFileDescriptor=socket(AF_INET,SOCK_STREAM,0);
 	int clientFileDescriptor;
 	int i;
-	int thread_count = NUM_STR;
+	int thread_count = THREAD_COUNT;
 	
 
 	pthread_t* thread_handles;
@@ -82,7 +83,7 @@ int main()
 	sock_var.sin_port=3000;
 	sock_var.sin_family=AF_INET;
 
-	for(i=0;i<NUM_STR;i++){
+	for(i=0;i<THREAD_COUNT;i++){
 	     start[i] = 0;
 	     finish[i] = 0;
 	     elapsed[i] = 0;
@@ -106,9 +107,9 @@ int main()
 	    //printf("n server socket has been created");
 	    listen(serverFileDescriptor,2000); 
 	    /*initialize the server theArray*/
-	
+	while(1){
 	    
-	    while(thread_number < (NUM_STR-1))        //loop infinity
+	    while(thread_number < (999))        //loop
 	    {
 		
 		clientFileDescriptor=accept(serverFileDescriptor,NULL,NULL);                                                              		        //printf("nConnected to client %dn",clientFileDescriptor);
@@ -120,20 +121,40 @@ int main()
 		
 
 	    }
+	    for (i = 0 ; i < THREAD_COUNT ; i++){
+		pthread_join(thread_handles[i],NULL);		
+	    }
+
+	    f = fopen("the_array_3.txt","a+");
+	    for (i = 0; i < THREAD_COUNT; i++){		
+		sum += elapsed[i];
+		//fprintf(f,"%s \n",theArray[i]);
+		if (elapsed[i] > 1000){
+			printf("start is %f\n",start[i]);
+			printf("finish is %f\n",finish[i]);
+			printf("elapsed is %f\n",elapsed[i]);			
+		}
 		
-		//pthread_join(thread_handles[thread_number],NULL);
-		pthread_mutex_destroy(&mutex);
-		close(serverFileDescriptor);
+	     }
+      	    fprintf(f, "%f \n", sum );
+	    printf("The server_mutex takes %f \n", sum);
+	    fclose(f);		
+	    for (i = 0 ; i < THREAD_COUNT ; i++){
+		start[i] = 0;
+		finish[i] = 0;
+		elapsed[i] = 0;
+		//pthread_join(thread_handles[i],NULL);		
+	    }
+	    sum = 0;
+	    thread_number = -1;
+	}
+	pthread_mutex_destroy(&mutex);
+	close(serverFileDescriptor);
 	}
 	else{
 		printf("n server socket creation failed\n");
 	}
-	f = fopen("the_array_1.txt","w");
-	for (i = 0; i < NUM_STR; i++){		
-		sum += elapsed[i];
-		fprintf(f,"%s \n",theArray[i]);
-	}
 	
-	printf("The server_mutex takes %f \n", sum);
+
 	return 0;
 }

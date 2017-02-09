@@ -10,23 +10,28 @@
 #include <pthread.h> 
 #include <string.h>
 #include "timer.h"
-#define NUM_STR 1024
 #define STR_LEN 1000
 
 //
+int thread_count;
+int port_num;
 int* seed;
+int array_size;
 void *Operate(void* rank);  /* Thread function */
 
-int main()
+int main( int argc, char* argv[] )
 {
 	//
-	int thread_count = NUM_STR;
+	thread_count = 1000;
+	array_size = atoi(argv[2]);
+	port_num = atoi(argv[1]);
+
 	long       thread;  /* Use long in case of a 64-bit system */
 	pthread_t* thread_handles; 
 
 	/* Initializes random number generators */
 	seed = malloc(thread_count*sizeof(int));	
-	for (thread = 0; thread < thread_count ; thread++)
+	for (thread = 0; thread < array_size ; thread++)
 	{
 		seed[thread] = thread;
 	}	
@@ -51,7 +56,7 @@ int main()
 void *Operate(void* rand){
 	long my_rand = (long) rand;
 	
-	int pos = rand_r(&seed[my_rand]) % NUM_STR;  
+	int pos = rand_r(&seed[my_rand]) % array_size;  
 	int randNum = rand_r(&seed[my_rand]) % 100;
 	/*connet to server*/	
 	struct sockaddr_in sock_var;
@@ -62,7 +67,7 @@ void *Operate(void* rand){
 	int read_or_write;
 	
 	sock_var.sin_addr.s_addr=inet_addr("127.0.0.1");
-	sock_var.sin_port=3000;
+	sock_var.sin_port=port_num;
 	sock_var.sin_family=AF_INET;
 	if(connect(clientFileDescriptor,(struct sockaddr*)&sock_var,sizeof(sock_var))>=0)
 	{	

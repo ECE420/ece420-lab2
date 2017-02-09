@@ -11,7 +11,7 @@
 //
 #include <string.h>
 #include "timer.h"
-#define NUM_STR 1024
+#define NUM_STR 1000
 #define STR_LEN 1000
 
 typedef struct{
@@ -114,7 +114,7 @@ int main()
 	    /*initialize the server theArray*/
 	
 	    
-	    while(thread_number < (NUM_STR-1))        //loop infinity
+	    while(thread_number < (999))        //loop infinity
 	    {
 		
 		clientFileDescriptor=accept(serverFileDescriptor,NULL,NULL);                                                              		        //printf("nConnected to client %dn",clientFileDescriptor);
