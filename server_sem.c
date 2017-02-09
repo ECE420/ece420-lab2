@@ -63,7 +63,8 @@ void *ServerEcho(void *args)
 	}
 	sem_post( &semaphores[row_num] );
 	GET_TIME(finish[thread_id]);	
-	elapsed[thread_id] = finish[thread_id] - start[thread_id];
+	//elapsed[thread_id] = finish[thread_id] - start[thread_id];
+
 
 	//printf("The start is %f, the finish is %f,elapesed time is %f \n",start[thread_id],finish[thread_id],finish[thread_id] - start[thread_id]);
 	close(clientFileDescriptor);	
@@ -122,19 +123,27 @@ int main()
 		passin[thread_number].clientFileDescriptor = clientFileDescriptor;
 		passin[thread_number].thread_number = thread_number;
 		//printf("The thread number is %d\n", thread_number);
-		pthread_create(&thread_handles[thread_number],NULL,ServerEcho,(void *)&passin[thread_number]);		
 		
-
+		pthread_create(&thread_handles[thread_number],NULL,ServerEcho,(void *)&passin[thread_number]);		
 	    }
+
 	    for (i = 0 ; i < THREAD_COUNT ; i++){
 		pthread_join(thread_handles[i],NULL);		
 	    }
-
-	    f = fopen("the_array_3.txt","a+");
-	    for (i = 0; i < THREAD_COUNT; i++){		
-		sum += elapsed[i];
+            
+   
+	    f = fopen("array_100_sem.txt","a+");
+	    // find largest end and smallest start
+	    double start_smallest =start[0];
+	    double end_largest = finish[0];
+	    for (i = 0; i < THREAD_COUNT; i++){	
+		if (start[i] < start_smallest)
+			start_smallest = start[i];
+		if (finish[i] > end_largest)
+			end_largest = finish[i];
 		//fprintf(f,"%s \n",theArray[i]);		
 	     }
+	    sum = end_largest - start_smallest;
       	    fprintf(f, "%f \n", sum );
 	    printf("The server_sem takes %f \n", sum);
 	    fclose(f);		
