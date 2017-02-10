@@ -11,7 +11,7 @@
 //
 #include <string.h>
 #include "timer.h"
-#define NUM_STR 10
+#define NUM_STR 10000
 #define STR_LEN 50
 #define THREAD_COUNT 1000
 
@@ -50,7 +50,7 @@ void *ServerEcho(void *args)
 	//printf("reading from client:%s",str);
 	
 	/* Parse the input string from client side */
-	sscanf(str, "%d%5d", &read_or_write, &row_num );
+	sscanf(str, "%d %d", &read_or_write, &row_num );
 	//printf("The received command in server side is %d, row: %d\n", read_or_write, row_num );
 	read_str = theArray[row_num];
 	if( read_or_write == 1 ) //Write
@@ -132,7 +132,7 @@ int main()
 		pthread_join(thread_handles[i],NULL);		
 	    }
 
-	    f = fopen("mutex_10.txt","a+");
+	    f = fopen("mutex_10000.txt","a+");
 	    for (i = 0; i < THREAD_COUNT; i++){		
 		sum += elapsed[i];
 		//fprintf(f,"%s \n",theArray[i]);

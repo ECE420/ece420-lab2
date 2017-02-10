@@ -11,7 +11,7 @@
 //
 #include <string.h>
 #include "timer.h"
-#define NUM_STR 10
+#define NUM_STR 10000
 #define STR_LEN 1000
 #define THREAD_COUNT 1000
 
@@ -134,7 +134,7 @@ int main()
 		pthread_join(thread_handles[i],NULL);		
 	    }
 
-	    f = fopen("sem_10.txt","a+");
+	    f = fopen("sem_10000.txt","a+");
 	    for (i = 0; i < THREAD_COUNT; i++){		
 		sum += elapsed[i];
 		//fprintf(f,"%s \n",theArray[i]);		
