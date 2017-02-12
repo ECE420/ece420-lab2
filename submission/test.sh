@@ -14,9 +14,9 @@
 # Parameters
 Duplicates=100
 # Port Number
-port=3002
+port=3015
 # The number of strings in theArray
-arraysize=10000
+arraysize=10
 
 
 clear

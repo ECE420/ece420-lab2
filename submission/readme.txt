@@ -1,0 +1,3 @@
+In order to compile the source files, first download the source files and go the source file folder. Next type "make" in the command window, 3 make files named "client", "server_mutex" and "server_sem". Then run either the server_mutex or server_sem by typing "./server_mutex xxxx xxxx" or "./server_sem xxxx xxxx" in the command window. Finally, run the test.shby typing "./test.sh" in the command window.
+
+Please notice that the first "xxxx" represents port number of client server connection; the second one represents the size of the string array stored in the server side. Those values should match the values in the test.sh file.
