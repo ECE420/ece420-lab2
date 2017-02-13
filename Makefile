@@ -1,4 +1,4 @@
 all:
-	gcc client.c -o client -lpthread
-	gcc server_sem.c -o server_sem -lpthread
-	gcc server_mutex.c -o server_mutex -lpthread
+	gcc -g -Wall client.c -o client -lpthread -lm
+	gcc -g -Wall server_sem.c -o server_sem -lpthread -lm
+	gcc -g -Wall server_mutex.c -o server_mutex -lpthread -lm

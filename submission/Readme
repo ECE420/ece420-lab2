@@ -1,0 +1,46 @@
+Read me for ECE420 lab2
+Feb. 2016
+
+=====
+Overview:
+	There are five groups of file in this folder
+
+-----
+	Server:
+	server_sem.c and server_mutex.c		
+		Create servers reciving and replying clients using semaphore method and mutex method.
+
+-----
+	client:
+	client.c	
+		Create number of client to send read and write requests to server.
+
+-----
+	Makefile
+		Compile server_sem.c server_mutex.c and client.c
+
+-----
+	Important functions:
+	timer.h	   macro definition for time measurement
+	
+-----
+	Result files:
+	.txt files	
+		.txt files are result files we stored for analysing the performance of two type of servers.
+
+=====
+
+Compile Instructions:
+
+
+In order to compile the source files, first download the source files and go the source file folder. Next type "make" in the command window, 3 make files named "client", "server_mutex" and "server_sem". Then run either the server_mutex or server_sem by typing "./server_mutex xxxx xxxx" or "./server_sem xxxx xxxx" in the command window. Finally, run the test.shby typing "./test.sh" in the command window.
+
+
+Please notice that the first "xxxx" represents port number of client server connection; the second one represents the size of the string array stored in the server side. Those values should match the values in the test.sh file.
+
+
+
+
+
+
+
