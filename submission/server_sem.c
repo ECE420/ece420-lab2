@@ -27,7 +27,7 @@ double start[THREAD_COUNT],finish[THREAD_COUNT], elapsed[THREAD_COUNT];
 double sum = 0;
 Passin_value passin[THREAD_COUNT];
 FILE *f;
-//File *f2;
+FILE *f2;
 
 void *ServerEcho(void *args)
 {
@@ -56,7 +56,7 @@ void *ServerEcho(void *args)
 
 	if( read_or_write == 1 )  //WRITE
 	{
-	    sprintf( theArray[row_num], "String %d has been modified by a write request", thread_number );
+	    sprintf( theArray[row_num], "String %d has been modified by a write request", row_num );
 	}
 	sem_post( &semaphores[row_num] );
 	/* Time measurement for each thread ends here */
@@ -156,6 +156,14 @@ int main(int argc, char* argv[])
       	    fprintf(f, "%f \n", sum );
 	    printf("The server_sem takes %f \n", sum);
 	    fclose(f);		
+	
+	   /* Log the theArray and compare the results for each run */
+            f2 = fopen("theArray_output_sem2.txt", "a+");
+            for(i=0; i< array_size; i++){
+            fprintf(f2, "%s \n", theArray[i]);
+            }
+            fclose(f2);
+
 
      	    /* Reset the start, finish, elapsed array for timer measurement */
 	    for (i = 0 ; i < THREAD_COUNT ; i++){
@@ -166,20 +174,14 @@ int main(int argc, char* argv[])
 	    /* Reset sum and thread_number */
 	    sum = 0;
 	    thread_number = -1;
+		
 	}
 	/* Destroy all the semaphores */
 	for (i = 0; i<array_size;i++){
 		sem_destroy(&semaphores[i]);
-	}	
-
-        /* Log the theArray and compare the results for each run */
-        //f2 = fopen("theArray_output.txt", "a+");
-        //for(i=0; i<array_size; i++){
-        //fprintf(f2, "%s \n", theArray[i];
-        //}
-        //fclose(f2);
 	
-	close(serverFileDescriptor);
+	}	
+    	close(serverFileDescriptor);
 	}
 
 	else

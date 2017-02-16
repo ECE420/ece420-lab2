@@ -32,7 +32,7 @@ int main( int argc, char* argv[] )
      	/* Initializes random number generators */
      	seed = malloc(thread_count*sizeof(int));	
 
-     	for (i = 0; i < array_size ; i++)
+     	for (i = 0; i < thread_count ; i++)
      	{
      	    seed[i] = i;
      	}	

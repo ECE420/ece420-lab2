@@ -28,7 +28,7 @@ double start[THREAD_COUNT],finish[THREAD_COUNT], elapsed[THREAD_COUNT];
 double sum = 0;
 Passin_value passin[THREAD_COUNT];
 FILE *f;
-//File *f2;
+FILE *f2;
 void *ServerEcho(void *args)
 {
 	int clientFileDescriptor;
@@ -56,7 +56,7 @@ void *ServerEcho(void *args)
 
 	if( read_or_write == 1 ) //Write
 	{
-	    sprintf(theArray[row_num], "String %d has been modified by a write request", thread_number );
+	    sprintf(theArray[row_num], "String %d has been modified by a write request", row_num );
 	}
 	pthread_mutex_unlock(&mutex);
 	/* Time measurement for each thread ends here */
@@ -140,19 +140,19 @@ int main(int argc, char* argv[])
 		pthread_create(&thread_handles[thread_number],NULL,ServerEcho,(void *)&passin[thread_number]);
 	    }
 	    /* Join all the threads and then calculate the totoal processing time and log necessary data */
-	    for (i = 0 ; i < THREAD_COUNT ; i++){
-		pthread_join(thread_handles[i],NULL);		
-	    }
-
-	    f = fopen("mutex_10000.txt","a+");
-
-	    for (i = 0; i < THREAD_COUNT; i++){		
-		sum += elapsed[i];		
-	    }
-	    /* Log the processing time results */
-      	    fprintf(f, "%f \n", sum );
-	    printf("The server_mutex takes %f \n", sum);
-	    fclose(f);
+    //	    for (i = 0 ; i < THREAD_COUNT ; i++){
+    //		pthread_join(thread_handles[i],NULL);		
+    //	    }
+    //
+    //	    f = fopen("mutex_10000.txt","a+");
+    //
+    //	    for (i = 0; i < THREAD_COUNT; i++){		
+    //		sum += elapsed[i];		
+    //	    }
+    //	    /* Log the processing time results */
+    //      	    fprintf(f, "%f \n", sum );
+    //	    printf("The server_mutex takes %f \n", sum);
+    //	    fclose(f);
 
      	    /* Reset the start, finish, elapsed array for timer measurement */
 	    for (i = 0 ; i < THREAD_COUNT ; i++){
@@ -165,11 +165,11 @@ int main(int argc, char* argv[])
 	    thread_number = -1;
 	    
 	    /* Log the theArray and compare the results for each run */
-	    //f2 = fopen("theArray_output.txt", "a+");
-	    //for(i=0; i<array_size; i++){
-	    //	fprintf(f2, "%s \n", theArray[i];
-	    //}
-	    //fclose(f2);
+	    f2 = fopen("theArray_output2.txt", "a+");
+	    for(i=0; i<array_size; i++){
+	    	fprintf(f2, "%s \n", theArray[i]);
+	    }
+	    fclose(f2);
 	}
 
 	pthread_mutex_destroy(&mutex);
